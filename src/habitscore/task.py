@@ -1,0 +1,133 @@
+from __future__ import annotations
+
+import json
+
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from enum import StrEnum, auto
+
+
+class TaskCategory(StrEnum):
+    HEALTH = auto()
+    BODY = auto()
+    MIND = auto()
+    WORK = auto()
+    HOBBIES = auto()
+    OTHER = auto()
+
+
+class Measurement(ABC):
+    @abstractmethod
+    def is_completed(self) -> bool:
+        pass
+
+    @abstractmethod
+    def to_json(self) -> dict:
+        pass
+
+    def to_json_template(self) -> dict:
+        pass
+
+
+class Completion(Measurement):
+    def __init__(self):
+        super().__init__()
+        self.completed = False
+
+    def is_completed(self) -> bool:
+        return self.completed is True
+
+    def to_json(self) -> dict:
+        return {"type": "completion",
+                "completed": self.completed}
+
+    def to_json_template(self) -> dict:
+        return {"type": "completion"}
+
+
+class Count(Measurement):
+    def __init__(self, goal: int, **kwargs):
+        super().__init__()
+        self.goal = goal
+        self.current_progress = 0
+
+    def is_completed(self) -> bool:
+        return self.current_progress == self.goal
+
+    def to_json(self) -> dict:
+        return {"type": "count",
+                "goal": self.goal,
+                "current_progress": self.current_progress}
+
+    def to_json_template(self) -> dict:
+        data = self.to_json()
+        data.pop('current_progress')
+        return data
+
+
+class EMeasurement(StrEnum):
+    COMPLETION = auto()
+    COUNT = auto()
+
+    @classmethod
+    def from_json(cls, json_data: dict) -> Measurement:
+        match json_data.pop('type'):
+            case "completion":
+                return Completion()
+            case _:
+                return Count(**json_data)
+
+
+@dataclass(order=True, eq=True)
+class Task:
+    sort_index: int = field(init=False, repr=False)
+    name: str
+    _score: int
+    measurement: Measurement
+    category: TaskCategory
+
+    def __post_init__(self):
+        self.sort_index = self.score
+
+    @property
+    def score(self) -> int:
+        return self._score
+
+    @score.setter
+    def score(self, new_score: int):
+        if -1 < new_score < 6:
+            self._score = new_score
+        else:
+            raise ValueError("Productivity score must be in range of 0-5")
+
+    @property
+    def is_completed(self) -> bool:
+        return self.measurement.is_completed()
+
+    def to_json(self) -> dict:
+        return {"name": self.name,
+                "category": self.category,
+                "_score": self.score,
+                "measurement": self.measurement.to_json()}
+
+    def to_json_template(self) -> dict:
+        data = self.to_json()
+        data['measurement'] = self.measurement.to_json_template()
+        return data
+
+
+@dataclass
+class TaskPreset:
+    name: str
+    tasks: list[Task]
+
+    def to_json(self):
+        tasks = [task.to_json() for task in self.tasks]
+        return {"name": self.name,
+                "tasks": tasks}
+
+    @classmethod
+    def preset_from_file(cls, filepath: str) -> TaskPreset:
+        with open(filepath, 'r') as file:
+            json_data = json.load(file)
+            print(json_data)
