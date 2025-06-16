@@ -1,0 +1,32 @@
+{
+  "weekdays": [
+    {
+      "name": "Monday",
+      "preset_name": "daily"
+    },
+    {
+      "name": "Tuesday",
+      "preset_name": "daily"
+    },
+    {
+      "name": "Wednesday",
+      "preset_name": "daily"
+    },
+    {
+      "name": "Thursday",
+      "preset_name": "daily"
+    },
+    {
+      "name": "Friday",
+      "preset_name": "daily"
+    },
+    {
+      "name": "Saturday",
+      "preset_name": "daily"
+    },
+    {
+      "name": "Sunday",
+      "preset_name": "daily"
+    }
+  ]
+}

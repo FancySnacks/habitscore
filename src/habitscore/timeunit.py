@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 
 from src.habitscore.task import TaskPreset
@@ -22,6 +22,9 @@ class TimeUnit(ABC):
 @dataclass
 class Day(TimeUnit):
     name: str
+    weekly_index: int
+    monthly_index: int
+    yearly_index: int
     tasks: TaskPreset
 
     def get_potential_score(self) -> int:
@@ -33,6 +36,7 @@ class Day(TimeUnit):
 
 @dataclass
 class Week(TimeUnit):
+    index: int
     days: list[Day]
 
     def get_potential_score(self) -> int:
@@ -44,6 +48,7 @@ class Week(TimeUnit):
 
 @dataclass
 class Month(TimeUnit):
+    name: str
     index: int
     weeks: list[Week]
 

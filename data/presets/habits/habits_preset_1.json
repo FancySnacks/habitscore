@@ -1,0 +1,111 @@
+{
+    "name": "daily",
+    "tasks": [
+        {
+            "name": "Zinc",
+            "category": "health",
+            "_score": 2,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "Clean Diet",
+            "category": "health",
+            "_score": 3,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "No Alcohol",
+            "category": "health",
+            "_score": 3,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "NoPMO",
+            "category": "health",
+            "_score": 3,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "No Coffee",
+            "category": "health",
+            "_score": 3,
+            "measurement": {
+                "type": "count",
+                "goal": 1
+            }
+        },
+        {
+            "name": "Gym",
+            "category": "health",
+            "_score": 3,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "Reading",
+            "category": "mind",
+            "_score": 3,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "German",
+            "category": "mind",
+            "_score": 2,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "Game Dev",
+            "category": "hobbies",
+            "_score": 4,
+            "measurement": {
+                "type": "completion"
+            }
+        }
+        ,
+        {
+            "name": "Electronics",
+            "category": "hobbies",
+            "_score": 4,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "Coding",
+            "category": "hobbies",
+            "_score": 4,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "Guitar",
+            "category": "hobbies",
+            "_score": 4,
+            "measurement": {
+                "type": "completion"
+            }
+        },
+        {
+            "name": "Prayer",
+            "category": "mind",
+            "_score": 2,
+            "measurement": {
+                "type": "completion"
+            }
+        }
+    ]
+}
