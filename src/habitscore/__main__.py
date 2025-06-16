@@ -34,37 +34,43 @@ class Calendar:
 
         c_month = 1
         c_week = 1
+        c_day = 1
         day_of_the_week = 1
 
+        months: list[Month] = []
         weeks: list[Week] = []
         days: list[Day] = []
 
-        for i in range(1, year_day_count + 1):
-            day_date = date(date.today().year, c_month, i)
-            weekday = day_date.isoweekday()
-            monthday = i % mc.get(self.int_to_month(day_date.month))
+        for item in mc.items():
+            month_daycount = item[1]
 
-            day = Day(name=self.int_to_weekday(weekday),
-                      weekly_index=day_of_the_week,
-                      monthly_index=monthday,
-                      yearly_index=i,
-                      tasks=TaskPreset("Default Preset", [])
-                      )
+            for day_i in range(1, month_daycount + 1):
+                day_date = date(date.today().year, c_month, day_i)
+                weekday = day_date.isoweekday()
 
-            days.append(day)
+                day = Day(name=self.int_to_weekday(weekday),
+                          weekly_index=day_of_the_week,
+                          monthly_index=day_i,
+                          yearly_index=c_day,
+                          tasks=TaskPreset("Default Preset", [])
+                          )
 
-            day_of_the_week += 1
+                days.append(day)
 
-            if day_of_the_week == 8:
-                week = Week(c_week, days)
-                weeks.append(week)
-                days.clear()
-                day_of_the_week = 1
+                c_day += 1
+                day_of_the_week += 1
 
-        #days = [Day()]
+                if weekday == 7:
+                    week = Week(c_week, days[:])
+                    weeks.append(week)
+                    days.clear()
+                    day_of_the_week = 1
 
-        print(year_day_count)
-        print(year_week_count)
+            month = Month(item[0], c_month, weeks[:])
+            months.append(month)
+            weeks.clear()
+
+            c_month += 1
 
         # create a year
         # create all 12 months
