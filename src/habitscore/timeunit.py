@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 
+from src.habitscore.util import weekday_to_int
 from src.habitscore.task import TaskPreset
 
 
@@ -31,6 +33,20 @@ class Day(TimeUnit):
     def __post_init__(self):
         self._sort_index = self.monthly_index
 
+    @classmethod
+    def day_from_file(cls, json_data: dict) -> Day:
+        with open(f"../../data/presets/weekdays_preset.json", 'r') as file:
+            index = weekday_to_int(json_data['name']) - 1
+            weekday = json.load(file)['weekdays'][index]
+            preset_name = weekday['preset_name']
+
+        preset_path = f"../../data/presets/tasks/{preset_name}.json"
+
+        task_preset = TaskPreset.preset_from_file(preset_path)
+        json_data.pop('preset_name')
+
+        return Day(**json_data, tasks=task_preset)
+
     def get_potential_score(self) -> int:
         return sum(task.score for task in self.tasks.tasks)
 
@@ -44,8 +60,8 @@ class Day(TimeUnit):
                 "yearly_index": self.yearly_index,
                 "preset_name": self.tasks.name}
 
-    def __repr__(self) -> str:
-        return f"{self.name} {self.monthly_index}, weekly = {self.weekly_index}, yearly = {self.yearly_index}"
+    def print_tasks(self):
+        return [print(task) for task in self.tasks.tasks]
 
 
 @dataclass(order=True)
@@ -56,6 +72,11 @@ class Week(TimeUnit):
 
     def __post_init__(self):
         self._sort_index = self.index
+
+    @classmethod
+    def week_from_file(cls, json_data: dict) -> Week:
+        days = [Day.day_from_file(data) for data in json_data['days']]
+        return Week(json_data['index'], days)
 
     def get_potential_score(self) -> int:
         return sum(day.get_potential_score() for day in self.days)
@@ -84,6 +105,12 @@ class Month(TimeUnit):
         [days_combined.extend(d) for d in days]
         self.days = sorted(days_combined)
 
+    @classmethod
+    def month_from_file(cls, json_data: dict) -> Month:
+        weeks = [Week.week_from_file(data) for data in json_data['weeks']]
+        json_data.pop('weeks')
+        return Month(**json_data, weeks=weeks)
+
     def get_potential_score(self) -> int:
         return sum(week.get_potential_score() for week in self.weeks)
 
@@ -93,8 +120,7 @@ class Month(TimeUnit):
     def to_json(self) -> dict:
         return {"name": self.name,
                 "index": self.index,
-                "weeks": [week.to_json() for week in self.weeks],
-                "days": [day.to_json() for day in self.days]}
+                "weeks": [week.to_json() for week in self.weeks]}
 
 
 @dataclass(order=True)
@@ -105,6 +131,12 @@ class Year(TimeUnit):
 
     def __post_init__(self):
         self._sort_index = self.year
+
+    @classmethod
+    def year_from_file(cls, json_data: dict) -> Year:
+        months = [Month.month_from_file(data) for data in json_data['months']]
+        json_data.pop('months')
+        return Year(json_data['year'], months=months)
 
     def get_potential_score(self) -> int:
         return sum(month.get_potential_score() for month in self.months)

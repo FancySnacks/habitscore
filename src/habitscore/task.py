@@ -22,6 +22,10 @@ class Measurement(ABC):
         pass
 
     @abstractmethod
+    def get_progress(self) -> str:
+        pass
+
+    @abstractmethod
     def to_json(self) -> dict:
         pass
 
@@ -36,6 +40,9 @@ class Completion(Measurement):
 
     def is_completed(self) -> bool:
         return self.completed is True
+
+    def get_progress(self) -> str:
+        return "COMPLETED" if self.completed else "UNCOMPLETED"
 
     def to_json(self) -> dict:
         return {"type": "completion",
@@ -54,6 +61,9 @@ class Count(Measurement):
     def is_completed(self) -> bool:
         return self.current_progress == self.goal
 
+    def get_progress(self) -> str:
+        return f"{self.current_progress}/{self.goal}"
+
     def to_json(self) -> dict:
         return {"type": "count",
                 "goal": self.goal,
@@ -71,11 +81,12 @@ class EMeasurement(StrEnum):
 
     @classmethod
     def from_json(cls, json_data: dict) -> Measurement:
-        match json_data.pop('type'):
+        o = json_data['measurement']
+        match o.pop('type').lower():
             case "completion":
                 return Completion()
             case _:
-                return Count(**json_data)
+                return Count(**o)
 
 
 @dataclass(order=True, eq=True)
@@ -104,6 +115,10 @@ class Task:
     def is_completed(self) -> bool:
         return self.measurement.is_completed()
 
+    @property
+    def get_progress(self) -> str:
+        return self.measurement.get_progress()
+
     def to_json(self) -> dict:
         return {"name": self.name,
                 "category": self.category,
@@ -114,6 +129,9 @@ class Task:
         data = self.to_json()
         data['measurement'] = self.measurement.to_json_template()
         return data
+
+    def __repr__(self) -> str:
+        return f"[{self.category}] {self.name} [{self.is_completed}]"
 
 
 @dataclass
@@ -130,4 +148,14 @@ class TaskPreset:
     def preset_from_file(cls, filepath: str) -> TaskPreset:
         with open(filepath, 'r') as file:
             json_data = json.load(file)
-            print(json_data)
+
+            tasks: list[Task] = []
+
+            for task_data in json_data['tasks']:
+                m = EMeasurement.from_json(task_data)
+                task_data.pop('measurement')
+                tasks.append(Task(**task_data, measurement=m))
+
+            task_preset = TaskPreset(json_data['name'], tasks)
+
+        return task_preset

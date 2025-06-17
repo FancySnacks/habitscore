@@ -1,49 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
+
 from datetime import date, datetime
 
+from src.habitscore.util import is_leap_year, int_to_weekday
 from task import TaskPreset
 from timeunit import Day, Year, Month, Week
-
-
-def is_leap_year(year: int) -> bool:
-    if year % 4 == 0:
-        if year % 100 == 0:
-            if year % 400 == 0:
-                return True
-    return False
-
-
-def int_to_weekday(n: int) -> str:
-    mapping = {1: 'Monday',
-               2: 'Tuesday',
-               3: 'Wednesday',
-               4: 'Thursday',
-               5: 'Friday',
-               6: 'Saturday',
-               7: 'Sunday',
-               }
-
-    return mapping[n]
-
-
-def int_to_month(n: int) -> str:
-    mapping = {1: 'January',
-               2: 'February',
-               3: 'March',
-               4: 'April',
-               5: 'May',
-               6: 'June',
-               7: 'July',
-               8: 'August',
-               9: 'September',
-               10: 'October',
-               11: 'November',
-               12: 'December',
-               }
-
-    return mapping[n]
 
 
 NOW = datetime.now()
@@ -69,8 +33,9 @@ class Calendar:
         self.years: list[Year] = []
 
     def load_calendar(self):
-        # first load from save file, only then create dynamically
-        # if load from save file: update all the way to current day
+        if self.year_save_exists(NOW.year):
+            self.import_year_from_file()
+            return
 
         c_month = 1
         c_week = 1
@@ -132,6 +97,17 @@ class Calendar:
     def get_current_year(self) -> Year:
         return self.years[-1]
 
+    def import_year_from_file(self):
+        with open(f"../../data/presets/{NOW.year}.json", 'r') as file:
+            json_data = json.load(file)
+            year = Year.year_from_file(json_data)
+
+            self.years.append(year)
+            self.today = self.get_today()
+
+    def year_save_exists(self, year: int) -> bool:
+        return os.path.exists(f"../../data/presets/{year}.json")
+
     def save_year_to_file(self):
         current_year = self.get_current_year()
 
@@ -143,3 +119,4 @@ class Calendar:
 cal = Calendar()
 cal.load_calendar()
 cal.save_year_to_file()
+print(cal.today.print_tasks())
