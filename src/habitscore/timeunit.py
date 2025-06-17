@@ -37,6 +37,13 @@ class Day(TimeUnit):
     def get_total_score(self) -> int:
         return sum(task.score for task in self.tasks.tasks if task.is_completed)
 
+    def to_json(self) -> dict:
+        return {"name": self.name,
+                "weekly_index": self.weekly_index,
+                "monthly_index": self.monthly_index,
+                "yearly_index": self.yearly_index,
+                "preset_name": self.tasks.name}
+
     def __repr__(self) -> str:
         return f"{self.name} {self.monthly_index}, weekly = {self.weekly_index}, yearly = {self.yearly_index}"
 
@@ -56,6 +63,10 @@ class Week(TimeUnit):
     def get_total_score(self) -> int:
         return sum(day.get_total_score() for day in self.days)
 
+    def to_json(self) -> dict:
+        return {"index": self.index,
+                "days": [day.to_json() for day in self.days]}
+
 
 @dataclass(order=True)
 class Month(TimeUnit):
@@ -73,18 +84,27 @@ class Month(TimeUnit):
         [days_combined.extend(d) for d in days]
         self.days = sorted(days_combined)
 
-
     def get_potential_score(self) -> int:
         return sum(week.get_potential_score() for week in self.weeks)
 
     def get_total_score(self) -> int:
         return sum(week.get_total_score() for week in self.weeks)
 
+    def to_json(self) -> dict:
+        return {"name": self.name,
+                "index": self.index,
+                "weeks": [week.to_json() for week in self.weeks],
+                "days": [day.to_json() for day in self.days]}
 
-@dataclass
+
+@dataclass(order=True)
 class Year(TimeUnit):
+    _sort_index: int = field(init=False, repr=False)
     year: int
     months: list[Month]
+
+    def __post_init__(self):
+        self._sort_index = self.year
 
     def get_potential_score(self) -> int:
         return sum(month.get_potential_score() for month in self.months)
@@ -94,3 +114,7 @@ class Year(TimeUnit):
 
     def s_today(self) -> str:
         return f"{len(self.months[-1].weeks[-1].days)} {self.months[-1]} {self.year}"
+
+    def to_json(self) -> dict:
+        return {"year": self.year,
+                "months": [month.to_json() for month in self.months]}

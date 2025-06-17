@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import date, datetime
 
 from task import TaskPreset
@@ -128,6 +129,17 @@ class Calendar:
     def get_today(self) -> Day:
         return self.years[-1].months[NOW.month - 1].days[NOW.day - 1]
 
+    def get_current_year(self) -> Year:
+        return self.years[-1]
+
+    def save_year_to_file(self):
+        current_year = self.get_current_year()
+
+        with open(f"../../data/presets/{current_year.year}.json", "w+") as file:
+            json_data = current_year.to_json()
+            json.dump(json_data, file, indent=5)
+
 
 cal = Calendar()
 cal.load_calendar()
+cal.save_year_to_file()
