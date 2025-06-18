@@ -40,7 +40,6 @@ class Calendar:
         c_month = 1
         c_week = 1
         c_day = 1
-        day_of_the_week = 1
 
         months: list[Month] = []
         weeks: list[Week] = []
@@ -119,4 +118,4 @@ class Calendar:
 cal = Calendar()
 cal.load_calendar()
 cal.save_year_to_file()
-print(cal.today.print_tasks())
+cal.today.print_tasks()

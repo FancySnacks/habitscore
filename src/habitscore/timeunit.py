@@ -61,7 +61,8 @@ class Day(TimeUnit):
                 "preset_name": self.tasks.name}
 
     def print_tasks(self):
-        return [print(task) for task in self.tasks.tasks]
+        for task in self.tasks.tasks:
+            print(task)
 
 
 @dataclass(order=True)
