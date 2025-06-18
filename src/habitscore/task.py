@@ -29,6 +29,13 @@ class Measurement(ABC):
     def to_json(self) -> dict:
         pass
 
+    @abstractmethod
+    def complete_task(self):
+        pass
+
+    def add_progress(self, progress: int):
+        pass
+
     def to_json_template(self) -> dict:
         pass
 
@@ -37,6 +44,9 @@ class Completion(Measurement):
     def __init__(self):
         super().__init__()
         self.completed = False
+
+    def complete_task(self):
+        self.completed = True
 
     def is_completed(self) -> bool:
         return self.completed is True
@@ -55,11 +65,17 @@ class Completion(Measurement):
 class Count(Measurement):
     def __init__(self, goal: int, **kwargs):
         super().__init__()
-        self.goal = goal
-        self.current_progress = 0
+        self.goal: int = goal
+        self.current_progress: int = 0
+
+    def complete_task(self):
+        self.current_progress = self.goal
+
+    def add_progress(self, progress: int):
+        self.current_progress += progress
 
     def is_completed(self) -> bool:
-        return self.current_progress == self.goal
+        return self.current_progress >= self.goal
 
     def get_progress(self) -> str:
         return f"{self.current_progress}/{self.goal}"
@@ -119,6 +135,9 @@ class Task:
     def get_progress(self) -> str:
         return self.measurement.get_progress()
 
+    def complete_task(self):
+        self.measurement.complete_task()
+
     def to_json(self) -> dict:
         return {"name": self.name,
                 "category": self.category,
@@ -138,6 +157,17 @@ class Task:
 class TaskPreset:
     name: str
     tasks: list[Task]
+
+    def complete_task_by_name(self, name: str):
+        task_to_complete = self.get_task_by_name(name)
+        task_to_complete.complete_task()
+
+    def get_task_by_name(self, name: str) -> Task:
+        for task in self.tasks:
+            if task.name == name:
+                return task
+
+        raise Exception("Task not found")
 
     def to_json(self):
         tasks = [task.to_json() for task in self.tasks]

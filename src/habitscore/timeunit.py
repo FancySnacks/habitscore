@@ -47,11 +47,17 @@ class Day(TimeUnit):
 
         return Day(**json_data, tasks=task_preset)
 
+    def complete_task_by_name(self, task_name: str):
+        self.tasks.complete_task_by_name(task_name)
+
     def get_potential_score(self) -> int:
         return sum(task.score for task in self.tasks.tasks)
 
     def get_total_score(self) -> int:
         return sum(task.score for task in self.tasks.tasks if task.is_completed)
+
+    def get_day_progress(self) -> str:
+        return f"{self.get_total_score()}/{self.get_potential_score()}"
 
     def to_json(self) -> dict:
         return {"name": self.name,
@@ -61,6 +67,8 @@ class Day(TimeUnit):
                 "preset_name": self.tasks.name}
 
     def print_tasks(self):
+        print(self.get_day_progress())
+
         for task in self.tasks.tasks:
             print(task)
 
