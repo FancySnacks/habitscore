@@ -5,9 +5,10 @@ import os
 
 from datetime import date, datetime
 
-from src.habitscore.util import is_leap_year, int_to_weekday
-from task import TaskPreset
-from timeunit import Day, Year, Month, Week
+from habitscore.util import is_leap_year, int_to_weekday
+from habitscore.task import TaskPreset
+from habitscore.timeunit import Day, Year, Month, Week
+from habitscore.const import PRESET_SAVE_PATH
 
 
 NOW = datetime.now()
@@ -97,7 +98,7 @@ class Calendar:
         return self.years[-1]
 
     def import_year_from_file(self):
-        with open(f"../../data/presets/{NOW.year}.json", 'r') as file:
+        with open(PRESET_SAVE_PATH.joinpath(f"{NOW.year}.json"), 'r') as file:
             json_data = json.load(file)
             year = Year.year_from_file(json_data)
 
@@ -105,17 +106,24 @@ class Calendar:
             self.today = self.get_today()
 
     def year_save_exists(self, year: int) -> bool:
-        return os.path.exists(f"../../data/presets/{year}.json")
+        return os.path.exists(PRESET_SAVE_PATH.joinpath(f"{year}.json"))
 
     def save_year_to_file(self):
         current_year = self.get_current_year()
 
-        with open(f"../../data/presets/{current_year.year}.json", "w+") as file:
+        with open(PRESET_SAVE_PATH.joinpath(f"{current_year}.json", "w+")) as file:
             json_data = current_year.to_json()
             json.dump(json_data, file, indent=5)
 
 
-cal = Calendar()
-cal.load_calendar()
-cal.save_year_to_file()
-cal.today.print_tasks()
+def main() -> int:
+    cal = Calendar()
+    cal.load_calendar()
+    cal.save_year_to_file()
+    cal.today.print_tasks()
+
+    return 0
+
+
+if __name__ == '__main__':
+    SystemExit(main())

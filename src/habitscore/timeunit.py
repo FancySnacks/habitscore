@@ -4,8 +4,9 @@ import json
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 
-from src.habitscore.util import weekday_to_int
-from src.habitscore.task import TaskPreset
+from habitscore.util import weekday_to_int
+from habitscore.task import TaskPreset
+from habitscore.const import PRESET_SAVE_PATH
 
 
 class TimeUnit(ABC):
@@ -35,12 +36,12 @@ class Day(TimeUnit):
 
     @classmethod
     def day_from_file(cls, json_data: dict) -> Day:
-        with open(f"../../data/presets/weekdays_preset.json", 'r') as file:
+        with open(PRESET_SAVE_PATH.joinpath("weekdays_preset.json")) as file:
             index = weekday_to_int(json_data['name']) - 1
             weekday = json.load(file)['weekdays'][index]
             preset_name = weekday['preset_name']
 
-        preset_path = f"../../data/presets/tasks/{preset_name}.json"
+        preset_path = PRESET_SAVE_PATH.joinpath(f"./tasks/{preset_name}.json")
 
         task_preset = TaskPreset.preset_from_file(preset_path)
         json_data.pop('preset_name')
