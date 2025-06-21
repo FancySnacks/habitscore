@@ -26,10 +26,15 @@ class TimeUnit(ABC):
 class Day(TimeUnit):
     _sort_index: int = field(init=False, repr=False)
     name: str
+
     weekly_index: int
     monthly_index: int
     yearly_index: int
+
     tasks: TaskPreset
+
+    month_ref: Month = field(init=False, repr=False, compare=False)
+    week_ref: Week = field(init=False, repr=False, compare=False)
 
     def __post_init__(self):
         self._sort_index = self.monthly_index
@@ -68,10 +73,13 @@ class Day(TimeUnit):
                 "preset_name": self.tasks.name}
 
     def print_tasks(self):
-        print(self.get_day_progress())
-
         for task in self.tasks.tasks:
             print(task)
+
+    def print(self):
+        print(f"{self.name} | {self.monthly_index} {self.month_ref.name} {self.month_ref.year_ref.year}")
+        super().print()
+        self.print_tasks()
 
 
 @dataclass(order=True)
@@ -80,13 +88,16 @@ class Week(TimeUnit):
     index: int
     days: list[Day]
 
+    month_ref: Month = field(init=False, repr=False, compare=False)
+
     def __post_init__(self):
         self._sort_index = self.index
 
     @classmethod
     def week_from_file(cls, json_data: dict) -> Week:
         days = [Day.day_from_file(data) for data in json_data['days']]
-        return Week(json_data['index'], days)
+        week = Week(json_data['index'], days)
+        return week
 
     def get_potential_score(self) -> int:
         return sum(day.get_potential_score() for day in self.days)
@@ -104,8 +115,11 @@ class Month(TimeUnit):
     _sort_index: int = field(init=False, repr=False)
     name: str
     index: int
+
     weeks: list[Week]
     days: list[Day] = field(init=False, default_factory=list)
+
+    year_ref: Year = field(init=False, repr=False, compare=False)
 
     def __post_init__(self):
         self._sort_index = self.index
@@ -113,13 +127,20 @@ class Month(TimeUnit):
         days = [week.days for week in self.weeks]
         days_combined = []
         [days_combined.extend(d) for d in days]
+
+        for week in self.weeks:
+            week.month_ref = self
+            for day in week.days:
+                day.month_ref = self
+
         self.days = sorted(days_combined)
 
     @classmethod
     def month_from_file(cls, json_data: dict) -> Month:
         weeks = [Week.week_from_file(data) for data in json_data['weeks']]
         json_data.pop('weeks')
-        return Month(**json_data, weeks=weeks)
+        month = Month(**json_data, weeks=weeks)
+        return month
 
     def get_potential_score(self) -> int:
         return sum(week.get_potential_score() for week in self.weeks)
@@ -141,6 +162,9 @@ class Year(TimeUnit):
 
     def __post_init__(self):
         self._sort_index = self.year
+
+        for month in self.months:
+            month.year_ref = self
 
     @classmethod
     def year_from_file(cls, json_data: dict) -> Year:

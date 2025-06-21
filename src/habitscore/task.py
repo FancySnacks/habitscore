@@ -150,7 +150,7 @@ class Task:
         return data
 
     def __repr__(self) -> str:
-        return f"[{self.category}] {self.name} [{self.is_completed}]"
+        return f"[{self.category:<10}] {self.name:<20} [{self.is_completed}]"
 
 
 @dataclass

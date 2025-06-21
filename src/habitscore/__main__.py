@@ -111,7 +111,7 @@ class Calendar:
     def save_year_to_file(self):
         current_year = self.get_current_year()
 
-        with open(PRESET_SAVE_PATH.joinpath(f"{current_year}.json", "w+")) as file:
+        with open(PRESET_SAVE_PATH.joinpath(f"{current_year.year}.json"), "w+") as file:
             json_data = current_year.to_json()
             json.dump(json_data, file, indent=5)
 
@@ -120,7 +120,7 @@ def main() -> int:
     cal = Calendar()
     cal.load_calendar()
     cal.save_year_to_file()
-    cal.today.print_tasks()
+    cal.today.print()
 
     return 0
 
