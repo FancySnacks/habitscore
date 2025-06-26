@@ -5,29 +5,12 @@ from __future__ import annotations
 import json
 import os
 
-from datetime import date, datetime
+from datetime import date
 
-from habitscore.util import is_leap_year, int_to_weekday
+from habitscore.util import int_to_weekday, get_month_day_count_n
 from habitscore.task import TaskPreset
 from habitscore.timeunit import Day, Year, Month, Week
-from habitscore.const import PRESET_SAVE_PATH
-
-
-NOW = datetime.now()
-CURRENT_YEAR: int = NOW.year
-
-MONTHS = {'January': 31,
-          'February': 29 if is_leap_year(CURRENT_YEAR) else 28,
-          'March': 31,
-          'April': 30,
-          'May': 31,
-          'June': 30,
-          'July': 31,
-          'August': 31,
-          'September': 30,
-          'October': 31,
-          'November': 30,
-          'December': 31}
+from habitscore.const import PRESET_SAVE_PATH, CURRENT_YEAR, NOW
 
 
 class Calendar:
@@ -36,7 +19,7 @@ class Calendar:
         self.years: list[Year] = []
 
     def load_calendar(self):
-        if self.year_save_exists(NOW.year):
+        if self.year_save_exists(CURRENT_YEAR):
             self.import_year_from_file()
             return
 
@@ -49,8 +32,8 @@ class Calendar:
         days: list[Day] = []
 
         # Loop through months
-        for item in MONTHS.items():
-            month_daycount = item[1]
+        for item in range(1, 13):
+            month_daycount = get_month_day_count_n(item)
             day_of_the_week = 1
 
             # Create Day object for every day in a given month
@@ -100,7 +83,7 @@ class Calendar:
         return self.years[-1]
 
     def import_year_from_file(self):
-        with open(PRESET_SAVE_PATH.joinpath(f"{NOW.year}.json"), 'r') as file:
+        with open(PRESET_SAVE_PATH.joinpath(f"{CURRENT_YEAR}.json"), 'r') as file:
             json_data = json.load(file)
             year = Year.year_from_file(json_data)
 
@@ -118,7 +101,7 @@ class Calendar:
             json.dump(json_data, file, indent=5)
 
 
-def main() -> int:
+def main(args: list[str] | None = None) -> int:
     cal = Calendar()
     cal.load_calendar()
     cal.save_year_to_file()
