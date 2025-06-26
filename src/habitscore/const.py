@@ -1,5 +1,5 @@
 import pathlib
 
-SRC_PATH = pathlib.Path.cwd()
-DIR_PATH = pathlib.Path.cwd().parent.parent
-PRESET_SAVE_PATH = DIR_PATH.joinpath(".\data\presets")
+SRC_PATH = pathlib.Path(__file__).resolve().parent
+PROJECT_ROOT = SRC_PATH.parent.parent
+PRESET_SAVE_PATH = PROJECT_ROOT / "data" / "presets"
