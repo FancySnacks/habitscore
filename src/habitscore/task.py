@@ -1,3 +1,5 @@
+"""Day tasks and functionality around them"""
+
 from __future__ import annotations
 
 import json

@@ -1,3 +1,5 @@
+"""Time unit logic for days, weeks, months and years"""
+
 from __future__ import annotations
 
 import json
