@@ -1,5 +1,6 @@
 """Arg parsing class for CLI functionality"""
 
+from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 
 
@@ -16,37 +17,13 @@ class ArgParser:
 
         self.subparsers = self._parser.add_subparsers(help='Subcommand help')
 
-        # ==== Add Subparser ==== #
-
-        self.add_subparser = self.subparsers.add_parser('add', help='Add new Task, Task Preset or Task Category')
-        self.subparsers_add = self.add_subparser.add_subparsers(help='Subcommand help')
-
-        self.add_task_subparser = self.subparsers_add.add_parser('task', help='Add new Task')
-        self.add_preset_subparser = self.subparsers_add.add_parser('preset', help='Add new Task')
-        self.add_category_subparser = self.subparsers_add.add_parser('category', help='Add new Task')
-
-        # ==== Delete Subparser ==== #
-
-        self.del_subparser = self.subparsers.add_parser('del', help='Del target Task, Task Preset or Task Category')
-        self.subparsers_del = self.del_subparser.add_subparsers(help='Subcommand help')
-
-        self.del_task_subparser = self.subparsers_del.add_parser('task', help='Delete Task')
-        self.del_preset_subparser = self.subparsers_del.add_parser('preset', help='Delete Preset')
-        self.del_category_subparser = self.subparsers_del.add_parser('category', help='Delete Task Category')
-
-        # ==== Update Subparser ==== #
-
-        self.update_subparser = self.subparsers.add_parser('update',
-                                                           help='Update attributes of target Task, Task Preset or '
-                                                                'Task Category')
-        self.subparsers_update = self.update_subparser.add_subparsers(help='Subcommand help')
-
-        self.update_task_subparser = self.subparsers_update.add_parser('task', help='Update Task')
-        self.update_preset_subparser = self.subparsers_update.add_parser('preset', help='Update Preset')
-        self.update_category_subparser = self.subparsers_update.add_parser('category', help='Update Task Category')
+        self.subparsers_o: list[Subparser] = []
+        self.subparsers_o.append(AddSubparser(self))
+        self.subparsers_o.append(DelSubparser(self))
+        self.subparsers_o.append(UpdateSubparser(self))
 
     # ArgExecutor for adding, deleting, updating
-    # Move subparsers into standalone classes
+    # Factory pattern for creating subparsers of the same subparser parent
 
     # Assign presets to days
     # Assign tasks (one-time) to days
@@ -59,3 +36,51 @@ class ArgParser:
         parsed_args = self._parser.parse_args(args)
         dict_args = parsed_args.__dict__
         print(dict_args)
+
+
+class Subparser(ABC):
+    def __init__(self, parent: ArgParser, name: str, help_text: str):
+        self.parent = parent
+        self._parser = self.parent.subparsers.add_parser(name, help=help_text)
+        self.subparsers = self._parser.add_subparsers(dest='item', required=True, help='Item type')
+        self.setup_args()
+
+    @abstractmethod
+    def setup_args(self):
+        pass
+
+
+class AddSubparser(Subparser):
+    def __init__(self, parent):
+        super().__init__(parent, name='add', help_text='Add new Task, Preset, or Category')
+
+    def setup_args(self):
+        task = self.subparsers.add_parser('task', help='Add a new Task')
+        task.add_argument('--name', required=True)
+
+        preset = self.subparsers.add_parser('preset', help='Add a new Preset')
+        category = self.subparsers.add_parser('category', help='Add a new Category')
+
+
+class DelSubparser(Subparser):
+    def __init__(self, parent):
+        super().__init__(parent, name='del', help_text='Delete target Task, Preset, or Category')
+
+    def setup_args(self):
+        task = self.subparsers.add_parser('task', help='Delete Task')
+        task.add_argument('--name', required=True)
+
+        preset = self.subparsers.add_parser('preset', help='Delete Preset')
+        category = self.subparsers.add_parser('category', help='Delete Category')
+        
+
+class UpdateSubparser(Subparser):
+    def __init__(self, parent):
+        super().__init__(parent, name='update', help_text='Update target Task, Preset, or Category')
+
+    def setup_args(self):
+        task = self.subparsers.add_parser('task', help='Update Task')
+        task.add_argument('--name', required=True)
+
+        preset = self.subparsers.add_parser('preset', help='Update Preset')
+        category = self.subparsers.add_parser('category', help='Update Category')
