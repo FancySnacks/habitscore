@@ -7,6 +7,7 @@ import os
 
 from datetime import date
 
+from habitscore.cli.argparser import ArgParser
 from habitscore.util import int_to_weekday, get_month_day_count_n
 from habitscore.task import TaskPreset
 from habitscore.timeunit import Day, Year, Month, Week
@@ -106,6 +107,9 @@ def main(args: list[str] | None = None) -> int:
     cal.load_calendar()
     cal.save_year_to_file()
     cal.today.print()
+
+    arg_parser = ArgParser()
+    parsed_args: dict = arg_parser.parse_execute_args(args)
 
     return 0
 
