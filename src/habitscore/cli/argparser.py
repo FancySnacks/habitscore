@@ -3,6 +3,10 @@
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 
+from habitscore.task import EMeasurement
+
+MEASUREMENT_OPTIONS: list[str] = list(EMeasurement)
+
 
 class ArgParser:
     def __init__(self):
@@ -57,9 +61,16 @@ class AddSubparser(Subparser):
     def setup_args(self):
         task = self.subparsers.add_parser('task', help='Add a new Task')
         task.add_argument('--name', required=True)
+        task.add_argument('--category', type=str, required=True)
+        task.add_argument('--score', type=int, required=True)
+        task.add_argument('--measurement', type=str, choices=MEASUREMENT_OPTIONS, required=True)
+        task.add_argument('--goal', type=int, help="Required when --measurement is 'count'")
 
         preset = self.subparsers.add_parser('preset', help='Add a new Preset')
+        preset.add_argument('--name', required=True)
+
         category = self.subparsers.add_parser('category', help='Add a new Category')
+        category.add_argument('--name', required=True)
 
 
 class DelSubparser(Subparser):

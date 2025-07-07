@@ -143,7 +143,7 @@ class Task:
     def to_json(self) -> dict:
         return {"name": self.name,
                 "category": self.category,
-                "_score": self.score,
+                "score": self.score,
                 "measurement": self.measurement.to_json()}
 
     def to_json_template(self) -> dict:
@@ -186,7 +186,8 @@ class TaskPreset:
             for task_data in json_data['tasks']:
                 m = EMeasurement.from_json(task_data)
                 task_data.pop('measurement')
-                tasks.append(Task(**task_data, measurement=m))
+                score = task_data.pop('score')
+                tasks.append(Task(**task_data, measurement=m, _score=score))
 
             task_preset = TaskPreset(json_data['name'], tasks)
 
