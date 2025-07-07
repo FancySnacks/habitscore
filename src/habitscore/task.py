@@ -9,6 +9,9 @@ from dataclasses import dataclass, field
 from enum import StrEnum, auto
 
 
+TASK_SCORE_RANGE = list(range(0, 6))
+
+
 class Measurement(ABC):
     @abstractmethod
     def is_completed(self) -> bool:
@@ -115,7 +118,7 @@ class Task:
 
     @score.setter
     def score(self, new_score: int):
-        if -1 < new_score < 6:
+        if new_score in TASK_SCORE_RANGE:
             self._score = new_score
         else:
             raise ValueError("Productivity score must be in range of 0-5")
