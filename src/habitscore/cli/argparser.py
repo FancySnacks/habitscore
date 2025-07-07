@@ -1,7 +1,7 @@
 """Arg parsing class for CLI functionality"""
 
 from abc import ABC, abstractmethod
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Action, ArgumentError
 
 from habitscore.task import EMeasurement, TASK_SCORE_RANGE
 
@@ -10,7 +10,11 @@ MEASUREMENT_OPTIONS: list[str] = list(EMeasurement)
 
 
 class ArgParser:
+    """Parses console args"""
+
     def __init__(self):
+        self.parsed_args: dict = dict()
+
         self._parser = ArgumentParser(prog="Habitscore",
                                       description="Example desc",
                                       epilog="FancySnacks 2025"
@@ -28,7 +32,6 @@ class ArgParser:
         self.subparsers_o.append(UpdateSubparser(self))
 
     # ArgExecutor for adding, deleting, updating
-    # Factory pattern for creating subparsers of the same subparser parent
 
     # Assign presets to days
     # Assign tasks (one-time) to days
@@ -39,7 +42,13 @@ class ArgParser:
 
     def parse_execute_args(self, args: list[str]):
         parsed_args = self._parser.parse_args(args)
+
         dict_args = parsed_args.__dict__
+        self.parsed_args = dict_args
+
+        for subparser in self.subparsers_o:
+            subparser.validate_args()
+
         print(dict_args)
 
 
@@ -53,6 +62,9 @@ class Subparser(ABC):
     @abstractmethod
     def setup_args(self):
         pass
+
+    def validate_args(self) -> bool:
+        return True
 
 
 class AddSubparser(Subparser):
@@ -69,6 +81,15 @@ class AddSubparser(Subparser):
 
         preset = self.subparsers.add_parser('preset', help='Add a new Preset')
         preset.add_argument('--name', required=True)
+
+    def validate_args(self):
+        if self.parent.parsed_args['measurement'] == 'count':
+            if self.parent.parsed_args.keys() is None:
+                raise ArgumentError(argument=None,
+                                    message="--measurement 'count' argument has to be used along with "
+                                            "measurable --goal <value> arg!")
+        else:
+            self.parent.parsed_args.pop('goal')
 
 
 class DelSubparser(Subparser):
