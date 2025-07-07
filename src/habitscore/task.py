@@ -9,15 +9,6 @@ from dataclasses import dataclass, field
 from enum import StrEnum, auto
 
 
-class TaskCategory(StrEnum):
-    HEALTH = auto()
-    BODY = auto()
-    MIND = auto()
-    WORK = auto()
-    HOBBIES = auto()
-    OTHER = auto()
-
-
 class Measurement(ABC):
     @abstractmethod
     def is_completed(self) -> bool:
@@ -113,7 +104,7 @@ class Task:
     name: str
     _score: int
     measurement: Measurement
-    category: TaskCategory
+    category: str
 
     def __post_init__(self):
         self.sort_index = self.score

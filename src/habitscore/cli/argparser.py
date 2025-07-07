@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 
 from habitscore.task import EMeasurement
 
+
 MEASUREMENT_OPTIONS: list[str] = list(EMeasurement)
 
 
@@ -56,7 +57,7 @@ class Subparser(ABC):
 
 class AddSubparser(Subparser):
     def __init__(self, parent):
-        super().__init__(parent, name='add', help_text='Add new Task, Preset, or Category')
+        super().__init__(parent, name='add', help_text='Add new Task or Task Preset')
 
     def setup_args(self):
         task = self.subparsers.add_parser('task', help='Add a new Task')
@@ -69,29 +70,25 @@ class AddSubparser(Subparser):
         preset = self.subparsers.add_parser('preset', help='Add a new Preset')
         preset.add_argument('--name', required=True)
 
-        category = self.subparsers.add_parser('category', help='Add a new Category')
-        category.add_argument('--name', required=True)
-
 
 class DelSubparser(Subparser):
     def __init__(self, parent):
-        super().__init__(parent, name='del', help_text='Delete target Task, Preset, or Category')
+        super().__init__(parent, name='del', help_text='Delete target Task or Task Preset')
 
     def setup_args(self):
         task = self.subparsers.add_parser('task', help='Delete Task')
         task.add_argument('--name', required=True)
 
         preset = self.subparsers.add_parser('preset', help='Delete Preset')
-        category = self.subparsers.add_parser('category', help='Delete Category')
-        
+        preset.add_argument('--name', required=True)
+
 
 class UpdateSubparser(Subparser):
     def __init__(self, parent):
-        super().__init__(parent, name='update', help_text='Update target Task, Preset, or Category')
+        super().__init__(parent, name='update', help_text='Update target Task or Task Preset')
 
     def setup_args(self):
         task = self.subparsers.add_parser('task', help='Update Task')
         task.add_argument('--name', required=True)
 
         preset = self.subparsers.add_parser('preset', help='Update Preset')
-        category = self.subparsers.add_parser('category', help='Update Category')
