@@ -88,7 +88,12 @@ class UpdateSubparser(Subparser):
         super().__init__(parent, name='update', help_text='Update target Task or Task Preset')
 
     def setup_args(self):
-        task = self.subparsers.add_parser('task', help='Update Task')
+        task = self.subparsers.add_parser('task', help='Update a Task')
         task.add_argument('--name', required=True)
+        task.add_argument('--category', type=str)
+        task.add_argument('--score', type=int, choices=TASK_SCORE_RANGE)
+        task.add_argument('--measurement', type=str, choices=MEASUREMENT_OPTIONS)
+        task.add_argument('--goal', type=int, help="Required when --measurement is 'count'")
 
-        preset = self.subparsers.add_parser('preset', help='Update Preset')
+        preset = self.subparsers.add_parser('preset', help='Update a Task Preset')
+        preset.add_argument('--name', required=True)
