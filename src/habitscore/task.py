@@ -8,6 +8,16 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
 
+from habitscore.validator import Validator
+
+
+class TaskScoreValidator(Validator):
+    def validate(self, value):
+        super().validate(value)
+
+        if value not in TASK_SCORE_RANGE:
+            raise ValueError(f"Task score value must be in range of {min(TASK_SCORE_RANGE)}-{max(TASK_SCORE_RANGE)}")
+
 
 TASK_SCORE_RANGE = list(range(0, 6))
 
@@ -105,23 +115,12 @@ class EMeasurement(StrEnum):
 class Task:
     sort_index: int = field(init=False, repr=False)
     name: str
-    _score: int
     measurement: Measurement
     category: str
+    score: int = TaskScoreValidator()
 
     def __post_init__(self):
         self.sort_index = self.score
-
-    @property
-    def score(self) -> int:
-        return self._score
-
-    @score.setter
-    def score(self, new_score: int):
-        if new_score in TASK_SCORE_RANGE:
-            self._score = new_score
-        else:
-            raise ValueError("Productivity score must be in range of 0-5")
 
     @property
     def is_completed(self) -> bool:
@@ -181,7 +180,7 @@ class TaskPreset:
                 m = EMeasurement.from_json(task_data)
                 task_data.pop('measurement')
                 score = task_data.pop('score')
-                tasks.append(Task(**task_data, measurement=m, _score=score))
+                tasks.append(Task(**task_data, measurement=m, score=score))
 
             task_preset = TaskPreset(json_data['name'], tasks)
 
