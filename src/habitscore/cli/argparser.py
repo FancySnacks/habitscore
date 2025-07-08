@@ -46,14 +46,17 @@ class ArgParser:
         dict_args = parsed_args.__dict__
         self.parsed_args = dict_args
 
-        for subparser in self.subparsers_o:
-            subparser.validate_args()
-
         print(dict_args)
+
+    def validate_parsed_subparsers(self):
+        for subparser in self.subparsers_o:
+            if subparser.name in self.parsed_args.keys():
+                subparser.validate_args()
 
 
 class Subparser(ABC):
     def __init__(self, parent: ArgParser, name: str, help_text: str):
+        self.name = name
         self.parent = parent
         self._parser = self.parent.subparsers.add_parser(name, help=help_text)
         self.subparsers = self._parser.add_subparsers(dest='item', required=True, help='Item type')
