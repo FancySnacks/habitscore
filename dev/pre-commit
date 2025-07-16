@@ -4,7 +4,7 @@ echo "===== pre-commit: Running pre-commit script ====="
 echo "===== pre-commit: Running pytest ====="
 
 pytest
-if [ $? -ne 0]
+if [ $? -ne 0 ]
 then
   echo "===== pre-commit: pytest failed, abandoning commit ====="
   exit 1
