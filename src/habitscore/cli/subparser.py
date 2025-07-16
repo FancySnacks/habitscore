@@ -1,10 +1,15 @@
 """Subparser classes"""
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from argparse import ArgumentError
+from typing import TYPE_CHECKING
 
-from habitscore.cli.argparser import ArgParser
 from habitscore.task import TASK_SCORE_RANGE, EMeasurement
+
+if TYPE_CHECKING:
+    from habitscore.cli.argparser import ArgParser
 
 
 MEASUREMENT_OPTIONS: list[str] = list(EMeasurement)
