@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "===== pre-commit: Running pre-commit script ====="
+echo "===== pre-commit: Running pytest ====="
+
+pytest
+if [ $? -ne 0]
+then
+  echo "===== pre-commit: pytest failed, abandoning commit ====="
+  exit 1
+else
+  echo "===== pre-commit: pytest success ====="
+fi
+
+echo "===== pre-commit: pre-commit success, committing..."
